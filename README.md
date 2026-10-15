@@ -33,7 +33,7 @@ node zip-cp1251-to-utf8.mjs [options] <zip-or-directory> [more...]
 | `-f, --force` | Overwrite an existing output file |
 | `-n, --dry-run` | Report what would be converted, write nothing |
 | `-l, --list` | Show the per-entry mapping (old bytes -> new name) |
-| `-e, --encoding <enc>` | Encoding of the old names (default `windows-1251`; `auto` picks between `windows-1251` and `ibm866`) |
+| `-e, --encoding <enc>` | Encoding of the old names (default `windows-1251`) |
 | `-q, --quiet` | Only warnings and the summary |
 | `--fix-backslashes` | Also turn DOS-style `\` separators into `/` |
 | `--keep-comments` | Leave per-entry comments untouched |
@@ -44,15 +44,6 @@ node zip-cp1251-to-utf8.mjs [options] <zip-or-directory> [more...]
 Names **and per-entry comments** are converted, because the EFS flag covers the
 comment field too (APPNOTE 4.4.4). The archive comment in the end record is
 copied unchanged (it has no encoding flag).
-
-Because DOS-era archives often use **CP866** rather than CP1251, the tool scores
-the names under both encodings and prints a warning when the encoding you asked
-for looks like the wrong one:
-
-```
-  warn: the names look more like ibm866 than windows-1251 (scores: windows-1251=52,
-        ibm866=421); if the converted names come out garbled, re-run with -e ibm866 or -e auto
-```
 
 Examples:
 
@@ -109,8 +100,8 @@ simply not part of the ZIP data, so the result is a plain, valid archive.
 * Multi-disk (split) archives are refused.
 * Entries that already declare UTF-8 names are copied through unchanged, so
   mixed archives are handled correctly.
-* Which encoding the old names use is a guess in general (`--encoding` lets you
-  pick another one, e.g. `ibm866` for CP866 names).
+* The name encoding is an assumption, not a detection: `--encoding` selects a
+  different one if a batch turns out not to be CP1251.
 
 ## Tests
 
@@ -130,8 +121,8 @@ python tests/verify_conversion.py     # writes tests/verify_report.txt
 
 `tests/make_edge_zips.py` + `tests/edge_checks.py` cover the nasty cases:
 empty archives, 300 entries, local/central extra fields, entries listed out of
-order, data descriptors with a scrambled layout, CP866 names (`-e ibm866`,
-`-e auto`), entry comments, an understated entry count, an over-long name,
+order, data descriptors with a scrambled layout, entry comments, an understated
+entry count, an over-long name,
 trailing junk and an SFX stub.
 
 ```bash

@@ -28,8 +28,7 @@
  *   -f, --force             Overwrite an existing output file
  *   -n, --dry-run           Only report which names would be converted
  *   -l, --list              Show the per-entry name mapping
- *   -e, --encoding <enc>    Encoding of the old names (default: windows-1251,
- *                           "auto" picks between windows-1251 and ibm866/CP866)
+ *   -e, --encoding <enc>    Encoding of the old names (default: windows-1251)
  *   -q, --quiet             Only print warnings and the final summary
  *   --fix-backslashes       Also convert '\' separators to '/' in names
  *   --keep-comments        Leave per-entry comments untouched (default: they
@@ -60,10 +59,6 @@ const EXTRA_ZIP64 = 0x0001;
 const COPY_BUF_SIZE = 1 << 20; // 1 MiB copy chunks
 
 const utf8Strict = new TextDecoder("utf-8", { fatal: true });
-
-// Legacy encodings an old Russian archive can plausibly use: Windows-1251
-// (Windows era) and CP866 (DOS era). "auto" scores both and picks the winner.
-const ENC_CANDIDATES = ["windows-1251", "ibm866"];
 
 const decoderCache = new Map();
 function getDecoder(label) {
@@ -102,49 +97,6 @@ function crc32Fallback(buf) {
 
 const crc32 = nativeCrc32 ? (buf) => nativeCrc32(buf) >>> 0 : crc32Fallback;
 
-// Heuristic plausibility score for a decoded name: Cyrillic and plain ASCII
-// count positively, Latin-1 punctuation/symbols and control characters
-// (typical of a mis-decoded legacy name) count negatively.
-function scoreText(s) {
-  let score = 0;
-  for (let i = 0; i < s.length; i++) {
-    const c = s.codePointAt(i);
-    if (c >= 0x0410 && c <= 0x044f) score += 4; // а-я А-Я
-    else if (c === 0x401 || c === 0x451) score += 4; // Ё ё
-    else if (c >= 0x0400 && c <= 0x04ff) score += 2;
-    else if (c >= 0x20 && c < 0x7f) score += 1; // printable ASCII
-    else if (c < 0x20) score -= 6; // control characters
-    else if (c >= 0xa0 && c <= 0xff) score -= 3; // «» ® ¬ Ґ …
-    else if (c >= 0x2010 && c <= 0x20ff) score -= 3; // – „ ™ …
-    else score -= 1;
-  }
-  return score;
-}
-
-function scoreEntriesNames(entries, decoder) {
-  let s = 0;
-  for (const e of entries) s += scoreText(decoder.decode(e.name));
-  return s;
-}
-
-// Decide which legacy encoding to use for this archive, and report when the
-// requested one looks wrong (the classic trap: DOS-era archives use CP866).
-function chooseEncoding(entries, requested) {
-  const labels = [requested === "auto" ? "windows-1251" : requested];
-  for (const l of ENC_CANDIDATES) if (!labels.includes(l)) labels.push(l);
-  const scores = new Map();
-  for (const label of labels) scores.set(label, scoreEntriesNames(entries, getDecoder(label)));
-  let best = requested === "auto" ? labels[0] : requested;
-  if (requested === "auto") {
-    for (const [label, s] of scores) if (s > scores.get(best)) best = label;
-  }
-  let hint = null;
-  for (const [label, s] of scores) {
-    if (label !== best && s > scores.get(best)) hint = label;
-  }
-  return { encoding: best, requested, scores, hint };
-}
-
 // ---------------------------------------------------------------- helpers
 function fail(msg) {
   throw new Error(msg);
@@ -166,8 +118,7 @@ function usage(code) {
     "  -f, --force             Overwrite existing output",
     "  -n, --dry-run           Report only, write nothing",
     "  -l, --list              Show per-entry name mapping",
-    "  -e, --encoding <enc>    Old name encoding (default windows-1251;",
-    "                          'auto' chooses between windows-1251 and CP866)",
+    "  -e, --encoding <enc>    Old name encoding (default windows-1251)",
     "  -q, --quiet             Only warnings and summary",
     "  --fix-backslashes       Convert backslash separators to '/'",
     "  --keep-comments         Do not convert per-entry comments",
@@ -251,13 +202,11 @@ function parseArgs(argv) {
     }
   }
   if (!opts.encoding) usage(2);
-  if (opts.encoding !== "auto") {
-    try {
-      getDecoder(opts.encoding);
-    } catch (err) {
-      process.stderr.write(err.message + "\n");
-      usage(2);
-    }
+  try {
+    getDecoder(opts.encoding);
+  } catch (err) {
+    process.stderr.write(err.message + "\n");
+    usage(2);
   }
   if (opts.inputs.length === 0) usage(2);
   if (opts.output !== null && !opts.output) {
@@ -429,17 +378,7 @@ function parseCentralDir(cd, count, where) {
 function planEntries(fd, size, entries, opts) {
   const warnings = [];
   const notes = [];
-  const enc = chooseEncoding(entries, opts.encoding);
-  const decoder = getDecoder(enc.encoding);
-  const scoreList = [...enc.scores].map(([l, s]) => l + "=" + s).join(", ");
-  if (enc.requested === "auto")
-    notes.push("encoding auto-detected as " + enc.encoding + " (scores: " + scoreList + ")");
-  else if (enc.hint)
-    warnings.push(
-      "the names look more like " + enc.hint + " than " + enc.encoding +
-        " (scores: " + scoreList + "); if the converted names come out garbled, " +
-        "re-run with -e " + enc.hint + " or -e auto"
-    );
+  const decoder = getDecoder(opts.encoding);
 
   const planned = entries.map((e, i) => {
     // ---- locate and cache the local file header (needed for writing too)
@@ -496,7 +435,7 @@ function planEntries(fd, size, entries, opts) {
       } catch {
         warnings.push(
           "entry " + i + ": UTF-8 flag set but name is not valid UTF-8; " +
-            "converting as " + enc.encoding
+            "converting as " + opts.encoding
         );
         // fall through and treat it as a legacy name
       }
@@ -560,7 +499,7 @@ function planEntries(fd, size, entries, opts) {
           " [" + p.kind + "]"
       );
   }
-  return { planned, warnings, notes, enc };
+  return { planned, warnings, notes };
 }
 
 // ---------------------------------------------------------------- writing

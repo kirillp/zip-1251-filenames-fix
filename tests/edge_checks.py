@@ -10,8 +10,8 @@ make_edge_zips.py and checks, with an independent parser:
   * compressed data is byte-for-byte identical
   * data descriptors are rewritten correctly (semantic check, not a copy check)
   * inputs are never modified, and failures leave no output or temp files
-  * warnings are emitted where they are expected (CP866 hint, dropped stub,
-    dropped trailing bytes)
+  * warnings are emitted where they are expected (dropped stub, dropped
+    trailing bytes)
 
 Results go to edge_report.txt (UTF-8).
 """
@@ -127,8 +127,6 @@ CASES = [
     ("edge-extra-fields.zip", "cp1251", (), "ok", "local/central extra fields preserved"),
     ("edge-out-of-order.zip", "cp1251", (), "ok", "central order differs from file order"),
     ("edge-descriptors-scrambled.zip", "cp1251", (), "ok", "descriptors without a next entry"),
-    ("edge-cp866.zip", "cp866", ("-e", "ibm866"), "ok", "explicit -e ibm866"),
-    ("edge-cp866.zip", "cp866", ("-e", "auto"), "ok", "encoding auto-detection"),
     ("edge-comments.zip", "cp1251", (), "ok", "entry comment converted with the name"),
     ("edge-comments.zip", "cp1251", ("--keep-comments",), "ok", "comment left alone on request"),
     ("edge-wrong-count.zip", "cp1251", (), "fail", "EOCD understates the entry count"),
@@ -185,9 +183,6 @@ def main():
         if temps:
             good = False
             verdict += " | LEFTOVER TEMP: %s" % temps
-        # expectation-specific assertions
-        if src == "edge-cp866.zip" and not args:
-            pass  # covered by the dedicated CP866 warning case below
         if src == "edge-sfx.zip" and expect == "ok" and os.path.exists(out):
             body = open(out, "rb").read()
             if not body.startswith(b"PK\x03\x04"):
@@ -205,27 +200,6 @@ def main():
         log("%-30s %s" % ("", note))
         if not good:
             ok = False
-
-    # CP866 names with the default CP1251 assumption: conversion must at least
-    # warn, so a wrong guess cannot slip through unnoticed in a big batch
-    log("")
-    log("=== the CP866 trap (default CP1251 assumption) ===")
-    src = os.path.join(HERE, "edge-cp866.zip")
-    out = os.path.join(HERE, "edge-cp866.utf8.zip")
-    if os.path.exists(out):
-        os.remove(out)
-    r = subprocess.run(["node", TOOL, src], capture_output=True, text=True,
-                       encoding="utf-8", cwd=ROOT)
-    stderr = (r.stderr or "").strip()
-    if os.path.exists(out):
-        _, cent, _ = parse_zip(out)
-        wrong = cent[0]["name"].decode("utf-8")
-        log("converted name with default settings: %r" % wrong)
-    if "ibm866" in stderr:
-        log("PASS warning suggests ibm866: %s" % stderr.splitlines()[0].strip()[-70:])
-    else:
-        log("FAIL no hint about the likely CP866 encoding was printed")
-        ok = False
 
     log("")
     log("=== originals untouched (vs backup) ===")

@@ -3,7 +3,7 @@
 
 Covers: empty archive, many entries, local!=central extra fields, entries
 listed out of order, SFX prefix stub, trailing junk after the EOCD,
-understated entry count, over-long converted names, CP866 names and
+understated entry count, over-long converted names and
 per-entry/archive comments.
 """
 import os
@@ -152,13 +152,7 @@ w("edge-long-name.zip", build([
     E(ru("Ы" * 33000), data=b"name grows past 65535 bytes\n"),
 ]))
 
-# 9) names actually encoded in CP866 (DOS-era Russian), not CP1251
-w("edge-cp866.zip", build([
-    E("Документы/Отчёт.txt".encode("cp866"), data=b"cp866 names\n"),
-    E("Читайте меня.txt".encode("cp866"), data=b"cp866 names 2\n"),
-]))
-
-# 10) comments: per-entry (covered by the EFS flag) and archive-level
+# 9) comments: per-entry (covered by the EFS flag) and archive-level
 w("edge-comments.zip", build([
     E(ru("С комментарием.txt"), data=b"entry comment\n",
       comment=ru("Комментарий записи на русском")),

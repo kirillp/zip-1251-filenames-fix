@@ -20,7 +20,6 @@ PASS ascii-names.zip -> ascii-names.utf8.zip (1 entries)
 
 === originals untouched (vs backup) ===
 PASS edge-comments.zip  sha256=7d2950a3cde093fe
-PASS edge-cp866.zip  sha256=c095a4e347a394d4
 PASS edge-descriptors-scrambled.zip  sha256=807630bdcb709abf
 PASS edge-empty.zip  sha256=8739c76e681f9009
 PASS edge-extra-fields.zip  sha256=37f2ac5751a82344

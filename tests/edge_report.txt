@@ -10,10 +10,6 @@ edge-out-of-order.zip          -                0     3 entries verified
                                central order differs from file order
 edge-descriptors-scrambled.zip -                0     3 entries verified
                                descriptors without a next entry
-edge-cp866.zip                 -e ibm866        0     2 entries verified
-                               explicit -e ibm866
-edge-cp866.zip                 -e auto          0     2 entries verified
-                               encoding auto-detection
 edge-comments.zip              -                0     1 entries verified
                                entry comment converted with the name
 edge-comments.zip              --keep-comments  0     1 entries verified
@@ -27,11 +23,7 @@ edge-trailing-junk.zip         -                0     1 entries verified | junk 
 edge-sfx.zip                   -                0     2 entries verified | stub dropped, warning present
                                SFX stub dropped + warned
 
-=== the CP866 trap (default CP1251 assumption) ===
-converted name with default settings: '„®Єг¬Ґ\xadвл/Ћвзсв.txt'
-PASS warning suggests ibm866: the converted names come out garbled, re-run with -e ibm866 or -e auto
-
 === originals untouched (vs backup) ===
-PASS all 11 fixtures unchanged
+PASS all 10 fixtures unchanged
 
 RESULT: all expectations met
