@@ -1,0 +1,51 @@
+=== conversion checks ===
+PASS cp1251-plain.zip -> cp1251-plain.utf8.zip (4 entries)
+     Данные/                            utf8: d0 94 d0 b0 d0 bd d0 bd d1 8b d0 b5 2f   cp1251: c4 e0 ed ed fb e5 2f
+     Приветствие.txt                    utf8: d0 9f d1 80 d0 b8 d0 b2 d0 b5 d1 82 d1 81 d1 82 d0 b2 d0 b8 d0 b5 2e 74 78 74   cp1251: cf f0 e8 e2 e5 f2 f1 f2 e2 e8 e5 2e 74 78 74
+     Заметки о проекте.txt              utf8: d0 97 d0 b0 d0 bc d0 b5 d1 82 d0 ba d0 b8 20 d0 be 20 d0 bf d1 80 d0 be d0 b5 d0 ba d1 82 d0 b5 2e 74 78 74   cp1251: c7 e0 ec e5 f2 ea e8 20 ee 20 ef f0 ee e5 ea f2 e5 2e 74 78 74
+     Данные/список.csv                  utf8: d0 94 d0 b0 d0 bd d0 bd d1 8b d0 b5 2f d1 81 d0 bf d0 b8 d1 81 d0 be d0 ba 2e 63 73 76   cp1251: c4 e0 ed ed fb e5 2f f1 ef e8 f1 ee ea 2e 63 73 76
+PASS cp1251-descriptors.zip -> cp1251-descriptors.utf8.zip (4 entries)
+     Папка/                             utf8: d0 9f d0 b0 d0 bf d0 ba d0 b0 2f   cp1251: cf e0 ef ea e0 2f
+     Папка/С дескриптором и подписью.txt utf8: d0 9f d0 b0 d0 bf d0 ba d0 b0 2f d0 a1 20 d0 b4 d0 b5 d1 81 d0 ba d1 80 d0 b8 d0 bf d1 82 d0 be d1 80 d0 be d0 bc 20 d0 b8 20 d0 bf d0 be d0 b4 d0 bf d0 b8 d1 81 d1 8c d1 8e 2e 74 78 74   cp1251: cf e0 ef ea e0 2f d1 20 e4 e5 f1 ea f0 e8 ef f2 ee f0 ee ec 20 e8 20 ef ee e4 ef e8 f1 fc fe 2e 74 78 74
+     Без подписи.dat                    utf8: d0 91 d0 b5 d0 b7 20 d0 bf d0 be d0 b4 d0 bf d0 b8 d1 81 d0 b8 2e 64 61 74   cp1251: c1 e5 e7 20 ef ee e4 ef e8 f1 e8 2e 64 61 74
+     Обычный файл.txt                   utf8: d0 9e d0 b1 d1 8b d1 87 d0 bd d1 8b d0 b9 20 d1 84 d0 b0 d0 b9 d0 bb 2e 74 78 74   cp1251: ce e1 fb f7 ed fb e9 20 f4 e0 e9 eb 2e 74 78 74
+PASS mixed.zip -> mixed.utf8.zip (2 entries)
+     Уже UTF-8.txt                      utf8: d0 a3 d0 b6 d0 b5 20 55 54 46 2d 38 2e 74 78 74   cp1251: d3 e6 e5 20 55 54 46 2d 38 2e 74 78 74
+     Ещё CP1251.txt                     utf8: d0 95 d1 89 d1 91 20 43 50 31 32 35 31 2e 74 78 74   cp1251: c5 f9 b8 20 43 50 31 32 35 31 2e 74 78 74
+PASS utf8-names.zip -> utf8-names.utf8.zip (2 entries)
+     Современный архив/файл.txt         utf8: d0 a1 d0 be d0 b2 d1 80 d0 b5 d0 bc d0 b5 d0 bd d0 bd d1 8b d0 b9 20 d0 b0 d1 80 d1 85 d0 b8 d0 b2 2f d1 84 d0 b0 d0 b9 d0 bb 2e 74 78 74   cp1251: d1 ee e2 f0 e5 ec e5 ed ed fb e9 20 e0 f0 f5 e8 e2 2f f4 e0 e9 eb 2e 74 78 74
+     Второй файл.txt                    utf8: d0 92 d1 82 d0 be d1 80 d0 be d0 b9 20 d1 84 d0 b0 d0 b9 d0 bb 2e 74 78 74   cp1251: c2 f2 ee f0 ee e9 20 f4 e0 e9 eb 2e 74 78 74
+PASS ascii-names.zip -> ascii-names.utf8.zip (1 entries)
+     plain-ascii.txt                    utf8: 70 6c 61 69 6e 2d 61 73 63 69 69 2e 74 78 74   cp1251: 70 6c 61 69 6e 2d 61 73 63 69 69 2e 74 78 74
+
+=== originals untouched (vs backup) ===
+PASS ascii-names.zip  sha256=9ddcdc857c49518e
+PASS cp1251-descriptors.zip  sha256=a54566d2f29c1582
+PASS cp1251-plain.zip  sha256=27806694b12f3038
+PASS edge-comments.zip  sha256=7d2950a3cde093fe
+PASS edge-cp866.zip  sha256=c095a4e347a394d4
+PASS edge-descriptors-scrambled.zip  sha256=807630bdcb709abf
+PASS edge-empty.zip  sha256=8739c76e681f9009
+PASS edge-extra-fields.zip  sha256=37f2ac5751a82344
+PASS edge-long-name.zip  sha256=0499c51ccda6346e
+PASS edge-many.zip  sha256=946edceeb9d14358
+PASS edge-out-of-order.zip  sha256=e076e8e85eba6ac6
+PASS edge-sfx.zip  sha256=042bcb15fa70d1b6
+PASS edge-trailing-junk.zip  sha256=3ddc0df4e600a7d8
+PASS edge-wrong-count.zip  sha256=05f2d7841a4b36ed
+PASS mixed.zip  sha256=dfe0022543e37d75
+PASS not-a-zip.zip  sha256=4a85a2f682aac4c5
+PASS utf8-names.zip  sha256=50977380578f95c0
+PASS zip64.zip  sha256=97244e210f58c081
+
+=== rejection checks ===
+PASS zip64.zip: refused, no output file left behind
+PASS not-a-zip.zip: failed cleanly, no output file left behind
+
+=== reading a converted archive with a normal tool ===
+  Папка/                                       0 bytes  crc=00000000
+  Папка/С дескриптором и подписью.txt         81 bytes  crc=5ab7b733
+  Без подписи.dat                             59 bytes  crc=66e10339
+  Обычный файл.txt                            59 bytes  crc=0669cc95
+
+RESULT: ALL CHECKS PASSED

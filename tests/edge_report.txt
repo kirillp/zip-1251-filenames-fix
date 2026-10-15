@@ -1,0 +1,37 @@
+fixture                        args             exit  verdict
+----------------------------------------------------------------------------------------
+edge-empty.zip                 -                0     0 entries verified
+                               empty archive stays empty
+edge-many.zip                  -                0     300 entries verified
+                               300 entries, offsets recomputed
+edge-extra-fields.zip          -                0     1 entries verified
+                               local/central extra fields preserved
+edge-out-of-order.zip          -                0     3 entries verified
+                               central order differs from file order
+edge-descriptors-scrambled.zip -                0     3 entries verified
+                               descriptors without a next entry
+edge-cp866.zip                 -e ibm866        0     2 entries verified
+                               explicit -e ibm866
+edge-cp866.zip                 -e auto          0     2 entries verified
+                               encoding auto-detection
+edge-comments.zip              -                0     1 entries verified
+                               entry comment converted with the name
+edge-comments.zip              --keep-comments  0     1 entries verified
+                               comment left alone on request
+edge-wrong-count.zip           -                1     refused: e holds a local file record that the central directory does not reference: refusing to convert, that file would be dropped
+                               EOCD understates the entry count
+edge-long-name.zip             -                1     refused:  name grows to 66000 bytes in UTF-8, over the 65535-byte ZIP limit (cannot be represented)
+                               converted name exceeds 65535 bytes
+edge-trailing-junk.zip         -                0     1 entries verified | junk dropped, warning present
+                               junk after EOCD is dropped + warned
+edge-sfx.zip                   -                0     2 entries verified | stub dropped, warning present
+                               SFX stub dropped + warned
+
+=== the CP866 trap (default CP1251 assumption) ===
+converted name with default settings: '„®Єг¬Ґ\xadвл/Ћвзсв.txt'
+PASS warning suggests ibm866: the converted names come out garbled, re-run with -e ibm866 or -e auto
+
+=== originals untouched (vs backup) ===
+PASS all 11 fixtures unchanged
+
+RESULT: all expectations met

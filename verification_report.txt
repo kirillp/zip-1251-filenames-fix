@@ -1,0 +1,19 @@
+Created source files in: D:\Playgroud\zip\files
+Wrote archive: D:\Playgroud\zip\russian-cp1251.zip (814 bytes)
+
+--- Verification ---
+Entries in central directory: 4
+  name: Данные/                      utf8-flag=False  bytes(cp1251)=c4 e0 ed ed fb e5 2f
+  name: Приветствие.txt              utf8-flag=False  bytes(cp1251)=cf f0 e8 e2 e5 f2 f1 f2 e2 e8 e5 2e 74 78 74
+  name: Заметки о проекте.txt        utf8-flag=False  bytes(cp1251)=c7 e0 ec e5 f2 ea e8 20 ee 20 ef f0 ee e5 ea f2 e5 2e 74 78 74
+  name: Данные/список.csv            utf8-flag=False  bytes(cp1251)=c4 e0 ed ed fb e5 2f f1 ef e8 f1 ee ea 2e 63 73 76
+Raw byte check (name bytes == CP1251 encoding): PASS
+
+Names as seen by UTF-8-centric tools (mojibake expected):
+  ─αφφ√σ/
+  ╧≡ΦΓσ≥±≥ΓΦσ.txt
+  ╟α∞σ≥ΩΦ ε ∩≡εσΩ≥σ.txt
+  ─αφφ√σ/±∩Φ±εΩ.csv
+Extracted round-trip (CP1251 decode) into: D:\Playgroud\zip\extract-check
+
+RESULT: OK

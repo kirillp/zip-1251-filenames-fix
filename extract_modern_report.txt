@@ -1,0 +1,3 @@
+﻿Заметки о проекте.txt        content identical to source in files\
+Приветствие.txt              content identical to source in files\
+Данные\список.csv            content identical to source in files\
