@@ -33,7 +33,6 @@ node zip-cp1251-to-utf8.mjs [options] <zip-or-directory> [more...]
 | `-f, --force` | Overwrite an existing output file |
 | `-n, --dry-run` | Report what would be converted, write nothing |
 | `-l, --list` | Show the per-entry mapping (old bytes -> new name) |
-| `-e, --encoding <enc>` | Encoding of the old names (default `windows-1251`) |
 | `-q, --quiet` | Only warnings and the summary |
 | `--fix-backslashes` | Also turn DOS-style `\` separators into `/` |
 | `--keep-comments` | Leave per-entry comments untouched |
@@ -100,8 +99,9 @@ simply not part of the ZIP data, so the result is a plain, valid archive.
 * Multi-disk (split) archives are refused.
 * Entries that already declare UTF-8 names are copied through unchanged, so
   mixed archives are handled correctly.
-* The name encoding is an assumption, not a detection: `--encoding` selects a
-  different one if a batch turns out not to be CP1251.
+* Names are always read as Windows-1251. There is no `--encoding` switch: this
+  is a CP1251 converter, and an archive that isn't CP1251 is simply out of
+  scope (it would be decoded as CP1251 and come out garbled).
 
 ## Tests
 

@@ -28,7 +28,6 @@
  *   -f, --force             Overwrite an existing output file
  *   -n, --dry-run           Only report which names would be converted
  *   -l, --list              Show the per-entry name mapping
- *   -e, --encoding <enc>    Encoding of the old names (default: windows-1251)
  *   -q, --quiet             Only print warnings and the final summary
  *   --fix-backslashes       Also convert '\' separators to '/' in names
  *   --keep-comments        Leave per-entry comments untouched (default: they
@@ -60,19 +59,14 @@ const COPY_BUF_SIZE = 1 << 20; // 1 MiB copy chunks
 
 const utf8Strict = new TextDecoder("utf-8", { fatal: true });
 
-const decoderCache = new Map();
-function getDecoder(label) {
-  if (!decoderCache.has(label)) {
-    try {
-      decoderCache.set(label, new TextDecoder(label));
-    } catch {
-      fail(
-        "unsupported encoding: " + label +
-          " (this Node build may lack full ICU data)"
-      );
-    }
-  }
-  return decoderCache.get(label);
+// Windows-1251 is the whole point of this tool, so it uses one shared decoder,
+// built at startup: a Node that lacks the needed ICU data then fails at once
+// with a clear message instead of part-way through a batch.
+let cp1251;
+try {
+  cp1251 = new TextDecoder("windows-1251");
+} catch {
+  fail("this Node build cannot decode windows-1251 (built without full ICU data)");
 }
 
 // crc32 of a buffer. node:zlib only grew zlib.crc32 in Node 20.15/22.2, so keep
@@ -118,7 +112,6 @@ function usage(code) {
     "  -f, --force             Overwrite existing output",
     "  -n, --dry-run           Report only, write nothing",
     "  -l, --list              Show per-entry name mapping",
-    "  -e, --encoding <enc>    Old name encoding (default windows-1251)",
     "  -q, --quiet             Only warnings and summary",
     "  --fix-backslashes       Convert backslash separators to '/'",
     "  --keep-comments         Do not convert per-entry comments",
@@ -139,7 +132,6 @@ function parseArgs(argv) {
     quiet: false,
     list: false,
     fixBackslashes: false,
-    encoding: "windows-1251",
     noVerify: false,
     noFsync: false,
     keepComments: false,
@@ -185,10 +177,6 @@ function parseArgs(argv) {
       case "--keep-comments":
         opts.keepComments = true;
         break;
-      case "-e":
-      case "--encoding":
-        opts.encoding = argv[++i];
-        break;
       case "-o":
       case "--output":
         opts.output = argv[++i];
@@ -200,13 +188,6 @@ function parseArgs(argv) {
         }
         opts.inputs.push(a);
     }
-  }
-  if (!opts.encoding) usage(2);
-  try {
-    getDecoder(opts.encoding);
-  } catch (err) {
-    process.stderr.write(err.message + "\n");
-    usage(2);
   }
   if (opts.inputs.length === 0) usage(2);
   if (opts.output !== null && !opts.output) {
@@ -378,7 +359,7 @@ function parseCentralDir(cd, count, where) {
 function planEntries(fd, size, entries, opts) {
   const warnings = [];
   const notes = [];
-  const decoder = getDecoder(opts.encoding);
+  const decoder = cp1251;
 
   const planned = entries.map((e, i) => {
     // ---- locate and cache the local file header (needed for writing too)
@@ -435,7 +416,7 @@ function planEntries(fd, size, entries, opts) {
       } catch {
         warnings.push(
           "entry " + i + ": UTF-8 flag set but name is not valid UTF-8; " +
-            "converting as " + opts.encoding
+            "converting as windows-1251"
         );
         // fall through and treat it as a legacy name
       }
