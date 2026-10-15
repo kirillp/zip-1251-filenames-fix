@@ -81,11 +81,26 @@ After writing the temporary file the tool re-opens it and checks that
 * every name is valid UTF-8 and decodes to exactly the intended string,
 * the EFS flag is set (and nothing else in the flags changed),
 * name lengths in the local headers agree with the central directory,
+* entry comments were converted to valid UTF-8 as well,
 * CRC-32, compressed and uncompressed sizes, method and attributes are
   identical to the source,
 * compressed data still inflates to the recorded CRC (unless `--no-verify`).
 
 The output is only renamed into place when all of that holds.
+
+## Refused rather than silently damaged
+
+These inputs are rejected with an explanation instead of producing a lossy result:
+
+* **ZIP64** archives and multi-disk (split) archives.
+* Archives whose end record **understates the entry count**, or that contain a
+  local file record no central-directory entry refers to — both would silently
+  lose files.
+* Names (or comments) that grow past the 65535-byte ZIP limit when re-encoded.
+
+Two lossy-but-harmless cases are converted **with a warning**: a self-extracting
+stub before the first entry, and bytes appended after the end record. Both are
+simply not part of the ZIP data, so the result is a plain, valid archive.
 
 ## Limitations
 
@@ -111,4 +126,15 @@ python tests/make_test_zips.py
 node zip-cp1251-to-utf8.mjs tests/cp1251-plain.zip tests/cp1251-descriptors.zip \
      tests/mixed.zip tests/utf8-names.zip tests/ascii-names.zip
 python tests/verify_conversion.py     # writes tests/verify_report.txt
+```
+
+`tests/make_edge_zips.py` + `tests/edge_checks.py` cover the nasty cases:
+empty archives, 300 entries, local/central extra fields, entries listed out of
+order, data descriptors with a scrambled layout, CP866 names (`-e ibm866`,
+`-e auto`), entry comments, an understated entry count, an over-long name,
+trailing junk and an SFX stub.
+
+```bash
+python tests/make_edge_zips.py
+python tests/edge_checks.py           # writes tests/edge_report.txt
 ```

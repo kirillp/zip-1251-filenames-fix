@@ -19,9 +19,6 @@ PASS ascii-names.zip -> ascii-names.utf8.zip (1 entries)
      plain-ascii.txt                    utf8: 70 6c 61 69 6e 2d 61 73 63 69 69 2e 74 78 74   cp1251: 70 6c 61 69 6e 2d 61 73 63 69 69 2e 74 78 74
 
 === originals untouched (vs backup) ===
-PASS ascii-names.zip  sha256=9ddcdc857c49518e
-PASS cp1251-descriptors.zip  sha256=a54566d2f29c1582
-PASS cp1251-plain.zip  sha256=27806694b12f3038
 PASS edge-comments.zip  sha256=7d2950a3cde093fe
 PASS edge-cp866.zip  sha256=c095a4e347a394d4
 PASS edge-descriptors-scrambled.zip  sha256=807630bdcb709abf
@@ -33,10 +30,6 @@ PASS edge-out-of-order.zip  sha256=e076e8e85eba6ac6
 PASS edge-sfx.zip  sha256=042bcb15fa70d1b6
 PASS edge-trailing-junk.zip  sha256=3ddc0df4e600a7d8
 PASS edge-wrong-count.zip  sha256=05f2d7841a4b36ed
-PASS mixed.zip  sha256=dfe0022543e37d75
-PASS not-a-zip.zip  sha256=4a85a2f682aac4c5
-PASS utf8-names.zip  sha256=50977380578f95c0
-PASS zip64.zip  sha256=97244e210f58c081
 
 === rejection checks ===
 PASS zip64.zip: refused, no output file left behind

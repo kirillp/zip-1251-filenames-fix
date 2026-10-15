@@ -18,9 +18,9 @@ edge-comments.zip              -                0     1 entries verified
                                entry comment converted with the name
 edge-comments.zip              --keep-comments  0     1 entries verified
                                comment left alone on request
-edge-wrong-count.zip           -                1     refused: e holds a local file record that the central directory does not reference: refusing to convert, that file would be dropped
+edge-wrong-count.zip           -                1     refused: FAIL D:\Playgroud\zip\tests\edge-wrong-count.zip: the archive holds a local file record that the central directory does not reference: refusing to convert, that file would be dropped
                                EOCD understates the entry count
-edge-long-name.zip             -                1     refused:  name grows to 66000 bytes in UTF-8, over the 65535-byte ZIP limit (cannot be represented)
+edge-long-name.zip             -                1     refused: FAIL D:\Playgroud\zip\tests\edge-long-name.zip: entry 0: the name grows to 66000 bytes in UTF-8, over the 65535-byte ZIP limit (cannot be represented)
                                converted name exceeds 65535 bytes
 edge-trailing-junk.zip         -                0     1 entries verified | junk dropped, warning present
                                junk after EOCD is dropped + warned

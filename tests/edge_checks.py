@@ -179,7 +179,7 @@ def main():
             elif os.path.exists(out):
                 good, verdict = False, "refused but left an output file behind"
             else:
-                verdict = "refused: " + (stderr.splitlines()[0][60:] if stderr else "?")
+                verdict = "refused: " + (stderr.splitlines()[0] if stderr else "?")
         # no temp files may survive
         temps = [f for f in os.listdir(HERE) if f.endswith(".tmp")]
         if temps:

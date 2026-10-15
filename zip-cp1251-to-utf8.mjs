@@ -81,23 +81,26 @@ function getDecoder(label) {
 }
 
 // crc32 of a buffer. node:zlib only grew zlib.crc32 in Node 20.15/22.2, so keep
-// a table-based fallback for older runtimes.
-const CRC_TABLE = (() => {
-  const t = new Uint32Array(256);
-  for (let i = 0; i < 256; i++) {
-    let c = i;
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    t[i] = c >>> 0;
-  }
-  return t;
-})();
+// a table-based fallback for older runtimes. The capability check happens once,
+// at load time; the table is only built if the fallback is actually used.
+const nativeCrc32 = typeof zlib.crc32 === "function" ? zlib.crc32 : null;
 
-function crc32(buf) {
-  if (typeof zlib.crc32 === "function") return zlib.crc32(buf) >>> 0;
+let crcTable = null;
+function crc32Fallback(buf) {
+  if (crcTable === null) {
+    crcTable = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      crcTable[i] = c >>> 0;
+    }
+  }
   let c = 0xffffffff;
-  for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
+  for (let i = 0; i < buf.length; i++) c = crcTable[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
   return (c ^ 0xffffffff) >>> 0;
 }
+
+const crc32 = nativeCrc32 ? (buf) => nativeCrc32(buf) >>> 0 : crc32Fallback;
 
 // Heuristic plausibility score for a decoded name: Cyrillic and plain ASCII
 // count positively, Latin-1 punctuation/symbols and control characters
@@ -257,6 +260,10 @@ function parseArgs(argv) {
     }
   }
   if (opts.inputs.length === 0) usage(2);
+  if (opts.output !== null && !opts.output) {
+    process.stderr.write("--output requires a file name\n");
+    usage(2);
+  }
   if (opts.output && opts.inputs.length !== 1) {
     process.stderr.write("--output can only be used with a single input file\n");
     usage(2);
@@ -699,6 +706,14 @@ function convertFile(src, dst, opts) {
         );
     }
     stats.entries = planned.length;
+    if (commentLen > 0) {
+      const cbuf = readAt(inFd, size, eocd.pos + 22, commentLen, "archive comment");
+      if (cbuf.some((b) => b >= 0x80))
+        warnings.push(
+          "the archive comment is not plain ASCII; it is copied byte-for-byte and " +
+            "modern tools will interpret it as UTF-8 (nothing can flag its encoding)"
+        );
+    }
     for (const p of planned) {
       if (p.kind === "renamed") stats.renamed++;
       else if (p.kind === "flag-only") stats.flagOnly++;
